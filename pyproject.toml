@@ -1,0 +1,10 @@
+[project]
+name = "strava-route-map"
+version = "0.1.0"
+description = "Fetch suggested routes from Strava and display them on an interactive Leaflet map"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "polyline>=2.0.4",
+    "requests>=2.34.2",
+]
