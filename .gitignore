@@ -1,3 +1,4 @@
 .strava_token
 __pycache__/
 *.pyc
+doc/.DS_Store
