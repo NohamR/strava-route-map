@@ -4,13 +4,13 @@ from dataclasses import dataclass, asdict
 from typing import Any, Optional
 import requests
 
-
 GRAPHQL_URL = "https://graphql.strava.com/"
 
 SUGGESTED_ROUTES_QUERY = """query SuggestedRoutes($args: SuggestedRouteOptionsInput!, $first: Int, $after: Cursor, $resolutions: [FlatmapResolutionInput!]!, $minSizeDesired: Short!, $lookupOptions: LookupOptionsInput) { suggestedRoutesBySourceGeo(args: $args, first: $first, after: $after) { __typename routes { __typename nodes { __typename ... on SuggestedRoute { elevationGain completionTimeEstimation { __typename expectedTime } length locationSummary(lookupOptions: $lookupOptions) routeSource title routeType routeUrl routeDetails { __typename overallDifficulty } themedMapImages(resolutions: $resolutions) { __typename darkUrl lightUrl } routePolylineData { __typename media(limit: 3, preferUnique: true) { __typename mediaDetails { __typename ... on Photo { imageUrlWithMetadata(minSizeDesired: $minSizeDesired) { __typename imageUrl size { __typename height width } } imageUrl(minSizeDesired: $minSizeDesired) } } } } legs { __typename paths { __typename polyline { __typename data } } } } } pageInfo { __typename hasNextPage endCursor } } totalCount adjustedBoundingBox { __typename northeastCorner { __typename lat lng } southwestCorner { __typename lat lng } } pointSourceType { __typename searchPoint { __typename point { __typename lat lng } } droppedPin { __typename point { __typename lng lat } } currentLocation { __typename point { __typename lng lat } } } } }"""
 
 
 # --- Input types ---
+
 
 @dataclass
 class Point:
@@ -76,6 +76,7 @@ class LookupOptions:
 
 
 # --- Response types ---
+
 
 @dataclass
 class MediaSize:
@@ -176,7 +177,7 @@ class SuggestedRoutesResult:
     routes: list[SuggestedRoute]
     pageInfo: PageInfo
     totalCount: int
-    adjustedBoundingBox: AdjustedBoundingBox
+    adjustedBoundingBox: AdjustedBoundingBox | None
     pointSourceType: PointSourceResult
 
 
@@ -273,8 +274,7 @@ def _parse_polyline_data(d: dict) -> PolylineData:
 def _parse_leg(d: dict) -> Leg:
     return Leg(
         paths=[
-            Path(polyline=EncodedStream(data=p["polyline"]["data"]))
-            for p in d["paths"]
+            Path(polyline=EncodedStream(data=p["polyline"]["data"])) for p in d["paths"]
         ]
     )
 
@@ -283,9 +283,9 @@ def _parse_suggested_route(d: dict) -> SuggestedRoute:
     cte = d.get("completionTimeEstimation")
     return SuggestedRoute(
         elevationGain=d["elevationGain"],
-        completionTimeEstimation=CompletionTimeEstimation(
-            expectedTime=cte["expectedTime"]
-        ) if cte else None,
+        completionTimeEstimation=(
+            CompletionTimeEstimation(expectedTime=cte["expectedTime"]) if cte else None
+        ),
         length=d["length"],
         locationSummary=d["locationSummary"],
         routeSource=d["routeSource"],
@@ -306,6 +306,22 @@ def _parse_suggested_route(d: dict) -> SuggestedRoute:
 
 def _parse_suggested_routes_response(data: dict) -> SuggestedRoutesResult:
     routes_data = data["routes"]
+    abb = data.get("adjustedBoundingBox")
+    adjusted_bb = (
+        AdjustedBoundingBox(
+            northeastCorner=Point(
+                lat=abb["northeastCorner"]["lat"],
+                lng=abb["northeastCorner"]["lng"],
+            ),
+            southwestCorner=Point(
+                lat=abb["southwestCorner"]["lat"],
+                lng=abb["southwestCorner"]["lng"],
+            ),
+        )
+        if abb
+        else None
+    )
+
     return SuggestedRoutesResult(
         routes=[_parse_suggested_route(n) for n in routes_data["nodes"]],
         pageInfo=PageInfo(
@@ -313,16 +329,7 @@ def _parse_suggested_routes_response(data: dict) -> SuggestedRoutesResult:
             endCursor=routes_data["pageInfo"]["endCursor"],
         ),
         totalCount=data["totalCount"],
-        adjustedBoundingBox=AdjustedBoundingBox(
-            northeastCorner=Point(
-                lat=data["adjustedBoundingBox"]["northeastCorner"]["lat"],
-                lng=data["adjustedBoundingBox"]["northeastCorner"]["lng"],
-            ),
-            southwestCorner=Point(
-                lat=data["adjustedBoundingBox"]["southwestCorner"]["lat"],
-                lng=data["adjustedBoundingBox"]["southwestCorner"]["lng"],
-            ),
-        ),
+        adjustedBoundingBox=adjusted_bb,
         pointSourceType=PointSourceResult(
             searchPoint=data["pointSourceType"].get("searchPoint"),
             droppedPin=data["pointSourceType"].get("droppedPin"),

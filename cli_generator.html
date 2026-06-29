@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Strava Route CLI Generator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <style>
+    *,
+    *::before,
+    *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      background: #f6f2ed;
+      color: #1a1614;
+      display: flex;
+      justify-content: center;
+      padding: 40px 20px;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 640px;
+      width: 100%;
+    }
+
+    h1 {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 6px;
+    }
+
+    p.subtitle {
+      font-size: 12px;
+      color: #a89f97;
+      margin-bottom: 28px;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 10px;
+      padding: 24px;
+      margin-bottom: 16px;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, .06);
+    }
+
+    .card-title {
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: #a89f97;
+      margin-bottom: 16px;
+    }
+
+    .form-row {
+      margin-bottom: 16px;
+    }
+
+    .form-row:last-child {
+      margin-bottom: 0;
+    }
+
+    .form-row label {
+      display: block;
+      font-size: 11px;
+      font-weight: 600;
+      color: #6b6158;
+      margin-bottom: 5px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .form-row label .required {
+      color: #e41a1c;
+    }
+
+    .form-row input,
+    .form-row select {
+      width: 100%;
+      padding: 8px 10px;
+      font-size: 13px;
+      font-family: 'JetBrains Mono', 'Courier New', monospace;
+      border: 1px solid #d8d2ca;
+      border-radius: 5px;
+      background: #fff;
+      color: #1a1614;
+      outline: none;
+      transition: border-color .15s ease;
+    }
+
+    .form-row input:focus,
+    .form-row select:focus {
+      border-color: #fc4c02;
+    }
+
+    .form-row input::placeholder {
+      color: #c4bcb4;
+    }
+
+    .form-row .hint {
+      font-size: 10px;
+      color: #a89f97;
+      margin-top: 4px;
+    }
+
+    .inline-group {
+      display: flex;
+      gap: 8px;
+    }
+
+    .inline-group input {
+      flex: 1;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 8px 14px;
+      font-family: 'Inter', sans-serif;
+      font-size: 11px;
+      font-weight: 600;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background .15s ease;
+      white-space: nowrap;
+    }
+
+    .btn-primary {
+      background: #fc4c02;
+      color: #fff;
+    }
+
+    .btn-primary:hover {
+      background: #e04402;
+    }
+
+    .btn-secondary {
+      background: #ddd8d0;
+      color: #3e3a35;
+    }
+
+    .btn-secondary:hover {
+      background: #cec8be;
+    }
+
+    .checkbox-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .checkbox-row input[type="checkbox"] {
+      width: auto;
+    }
+
+    .checkbox-row label {
+      display: inline;
+      font-size: 12px;
+      text-transform: none;
+      letter-spacing: 0;
+      color: #3e3a35;
+      font-weight: 400;
+    }
+
+    .collapsible {
+      display: none;
+    }
+
+    .collapsible.open {
+      display: block;
+    }
+
+    .output {
+      background: #1a1614;
+      border-radius: 8px;
+      padding: 16px;
+      position: relative;
+    }
+
+    .output code {
+      display: block;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      line-height: 1.6;
+      color: #c4bcb4;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+
+    .output .btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #1a1614;
+      color: #fff;
+      padding: 10px 20px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 500;
+      opacity: 0;
+      transition: opacity .2s ease;
+      pointer-events: none;
+    }
+
+    .toast.show {
+      opacity: 1;
+    }
+
+    #map {
+      height: 260px;
+      border-radius: 6px;
+      border: 1px solid #d8d2ca;
+      margin-top: 12px;
+      z-index: 0;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <h1>Strava Route CLI Generator</h1>
+    <p class="subtitle">Fill in the fields below to generate a CLI command</p>
+
+    <div class="card">
+      <div class="card-title">Location</div>
+      <div class="form-row">
+        <label>Latitude <span class="required">*</span></label>
+        <div class="inline-group">
+          <input type="number" id="lat" step="any" placeholder="e.g. 48.6882">
+          <input type="number" id="lng" step="any" placeholder="e.g. 2.1854">
+          <button class="btn btn-secondary" onclick="getLocation()">Auto-detect</button>
+        </div>
+        <div class="hint" id="loc-status">Enter coordinates, click the map, or click Auto-detect</div>
+      </div>
+      <div id="map"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Route</div>
+      <div class="form-row">
+        <label>Route Type <span class="required">*</span></label>
+        <select id="route-type">
+          <option value="">-- Select --</option>
+          <option value="Run">Run</option>
+          <option value="TrailRun">Trail Run</option>
+          <option value="Walk">Walk</option>
+          <option value="Hike">Hike</option>
+          <option value="Ride">Ride</option>
+          <option value="MountainBikeRide">Mountain Bike</option>
+          <option value="GravelRide">Gravel Ride</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <label>Difficulty</label>
+        <select id="difficulty">
+          <option value="Undefined">Any</option>
+          <option value="Easy">Easy</option>
+          <option value="Moderate">Moderate</option>
+          <option value="Hard">Hard</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <label>Min Elevation (m)</label>
+        <input type="number" id="elevation" placeholder="0">
+      </div>
+      <div class="form-row">
+        <label>Target Distance (km)</label>
+        <input type="number" id="distance" step="any" placeholder="-1 (no preference)">
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Bounding Box <span
+          style="font-weight:400;text-transform:none;color:#c4bcb4;font-size:11px;letter-spacing:0">(optional)</span>
+      </div>
+      <div class="checkbox-row">
+        <input type="checkbox" id="custom-bbox">
+        <label for="custom-bbox">Set custom bounding box</label>
+      </div>
+      <div class="collapsible" id="bbox-fields">
+        <div class="form-row" style="margin-top:12px">
+          <label>NE Corner (lat, lng)</label>
+          <div class="inline-group">
+            <input type="number" id="bbox-ne-lat" step="any" placeholder="lat">
+            <input type="number" id="bbox-ne-lng" step="any" placeholder="lng">
+          </div>
+        </div>
+        <div class="form-row">
+          <label>SW Corner (lat, lng)</label>
+          <div class="inline-group">
+            <input type="number" id="bbox-sw-lat" step="any" placeholder="lat">
+            <input type="number" id="bbox-sw-lng" step="any" placeholder="lng">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-bottom:16px">
+      <button class="btn btn-primary" onclick="generate()"
+        style="width:100%;justify-content:center;padding:10px;font-size:13px">Generate CLI Command</button>
+    </div>
+
+    <div class="output" id="output">
+      <code id="command-display">Fill in the required fields and click Generate</code>
+      <button class="btn btn-secondary" onclick="copyCommand()">Copy</button>
+    </div>
+  </div>
+
+  <div class="toast" id="toast">Copied!</div>
+
+  <script>
+    var map = L.map("map").setView([20, 0], 2);
+    L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+      maxZoom: 19,
+    }).addTo(map);
+
+    var marker = null;
+
+    function placeMarker(lat, lng) {
+      if (marker) map.removeLayer(marker);
+      marker = L.marker([lat, lng], { draggable: true }).addTo(map);
+      marker.on("dragend", function () {
+        var pos = marker.getLatLng();
+        document.getElementById("lat").value = pos.lat.toFixed(6);
+        document.getElementById("lng").value = pos.lng.toFixed(6);
+      });
+      map.setView([lat, lng], 13);
+    }
+
+    map.on("click", function (e) {
+      var lat = e.latlng.lat.toFixed(6);
+      var lng = e.latlng.lng.toFixed(6);
+      document.getElementById("lat").value = lat;
+      document.getElementById("lng").value = lng;
+      placeMarker(parseFloat(lat), parseFloat(lng));
+    });
+
+    function updateFromInputs() {
+      var lat = parseFloat(document.getElementById("lat").value);
+      var lng = parseFloat(document.getElementById("lng").value);
+      if (!isNaN(lat) && !isNaN(lng)) placeMarker(lat, lng);
+    }
+
+    document.getElementById("lat").addEventListener("change", updateFromInputs);
+    document.getElementById("lng").addEventListener("change", updateFromInputs);
+
+    function getLocation() {
+      var status = document.getElementById("loc-status");
+      if (!navigator.geolocation) {
+        status.textContent = "Geolocation not supported by your browser";
+        return;
+      }
+      status.textContent = "Detecting location...";
+      navigator.geolocation.getCurrentPosition(
+        function (pos) {
+          var lat = pos.coords.latitude.toFixed(6);
+          var lng = pos.coords.longitude.toFixed(6);
+          document.getElementById("lat").value = lat;
+          document.getElementById("lng").value = lng;
+          placeMarker(parseFloat(lat), parseFloat(lng));
+          status.textContent = "Location detected";
+        },
+        function (err) {
+          status.textContent = "Failed to detect location: " + err.message;
+        },
+        { enableHighAccuracy: true, timeout: 10000 }
+      );
+    }
+
+    document.getElementById("custom-bbox").addEventListener("change", function () {
+      document.getElementById("bbox-fields").classList.toggle("open", this.checked);
+    });
+
+    function generate() {
+      var lat = document.getElementById("lat").value.trim();
+      var lng = document.getElementById("lng").value.trim();
+      var routeType = document.getElementById("route-type").value;
+      var difficulty = document.getElementById("difficulty").value;
+      var elevation = document.getElementById("elevation").value.trim();
+      var distance = document.getElementById("distance").value.trim();
+
+      var errors = [];
+      if (!lat || !lng) errors.push("Location (lat/lng) is required");
+      if (!routeType) errors.push("Route type is required");
+
+      if (errors.length) {
+        document.getElementById("command-display").textContent = "Error: " + errors.join("; ");
+        return;
+      }
+
+      var cmd = "uv run main.py";
+      cmd += " --route-type " + routeType;
+      cmd += " --location " + lat + "," + lng;
+
+      if (difficulty && difficulty !== "Undefined") {
+        cmd += " --difficulty " + difficulty;
+      }
+      if (elevation && parseInt(elevation) !== 0) {
+        cmd += " --elevation " + elevation;
+      }
+      if (distance && parseInt(distance) !== -1) {
+        cmd += " --target-distance " + distance;
+      }
+
+      var useCustomBbox = document.getElementById("custom-bbox").checked;
+      if (useCustomBbox) {
+        var neLat = document.getElementById("bbox-ne-lat").value.trim();
+        var neLng = document.getElementById("bbox-ne-lng").value.trim();
+        var swLat = document.getElementById("bbox-sw-lat").value.trim();
+        var swLng = document.getElementById("bbox-sw-lng").value.trim();
+        if (neLat && neLng && swLat && swLng) {
+          cmd += " --bounding-box " + neLat + "," + neLng + "," + swLat + "," + swLng;
+        }
+      }
+
+      document.getElementById("command-display").textContent = cmd;
+    }
+
+    function copyCommand() {
+      var text = document.getElementById("command-display").textContent;
+      if (!text || text.startsWith("Error") || text.startsWith("Fill")) return;
+      navigator.clipboard.writeText(text).then(function () {
+        var toast = document.getElementById("toast");
+        toast.classList.add("show");
+        setTimeout(function () { toast.classList.remove("show"); }, 1500);
+      });
+    }
+  </script>
+</body>
+
+</html>

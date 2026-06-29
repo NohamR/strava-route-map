@@ -7,8 +7,13 @@ from polyline import decode as decode_polyline
 from strava_graphql import SuggestedRoute, SuggestedRoutesResult
 
 COLORS = [
-    "#e41a1c", "#377eb8", "#4daf4a", "#984ea3",
-    "#ff7f00", "#a65628", "#f781bf",
+    "#e41a1c",
+    "#377eb8",
+    "#4daf4a",
+    "#984ea3",
+    "#ff7f00",
+    "#a65628",
+    "#f781bf",
 ]
 
 
@@ -21,14 +26,18 @@ def get_route_coords(route: SuggestedRoute) -> list[list[tuple[float, float]]]:
     return coords
 
 
-def _route_bounds(all_coords: list[list[tuple[float, float]]]) -> tuple[float, float, float, float]:
+def _route_bounds(
+    all_coords: list[list[tuple[float, float]]],
+) -> tuple[float, float, float, float]:
     lats = [p for seg in all_coords for (p, _) in seg]
     lngs = [p for seg in all_coords for (_, p) in seg]
     return min(lats), max(lats), min(lngs), max(lngs)
 
 
 def _common_region(routes: list[dict]) -> str:
-    regions = [r["location"].split(", ", 1)[-1] for r in routes if ", " in r["location"]]
+    regions = [
+        r["location"].split(", ", 1)[-1] for r in routes if ", " in r["location"]
+    ]
     return Counter(regions).most_common(1)[0][0] if regions else ""
 
 
@@ -43,24 +52,23 @@ def display_routes_map(
         color = COLORS[i % len(COLORS)]
         eta = (
             f"{route.completionTimeEstimation.expectedTime / 60:.0f} min"
-            if route.completionTimeEstimation else ""
+            if route.completionTimeEstimation
+            else ""
         )
-        routes_data.append({
-            "index": i,
-            "title": route.title,
-            "type": route.routeType,
-            "distance_km": round(route.length / 1000, 1),
-            "elevation_m": round(route.elevationGain),
-            "location": route.locationSummary,
-            "eta": eta,
-            "color": color,
-            "bounds": bounds,
-            "coords": coords,
-        })
-
-    bb = result.adjustedBoundingBox
-    center_lat = (bb.northeastCorner.lat + bb.southwestCorner.lat) / 2
-    center_lng = (bb.northeastCorner.lng + bb.southwestCorner.lng) / 2
+        routes_data.append(
+            {
+                "index": i,
+                "title": route.title,
+                "type": route.routeType,
+                "distance_km": round(route.length / 1000, 1),
+                "elevation_m": round(route.elevationGain),
+                "location": route.locationSummary,
+                "eta": eta,
+                "color": color,
+                "bounds": bounds,
+                "coords": coords,
+            }
+        )
 
     cur = result.pointSourceType.currentLocation
 
@@ -68,6 +76,26 @@ def display_routes_map(
     routes_js = _routes_js(routes_data)
     cur_js = _current_location_js(cur) if cur else ""
     location_summary = _common_region(routes_data)
+
+    bb = result.adjustedBoundingBox
+    if bb:
+        center_lat = (bb.northeastCorner.lat + bb.southwestCorner.lat) / 2
+        center_lng = (bb.northeastCorner.lng + bb.southwestCorner.lng) / 2
+        bb_ne_lat = bb.northeastCorner.lat
+        bb_ne_lng = bb.northeastCorner.lng
+        bb_sw_lat = bb.southwestCorner.lat
+        bb_sw_lng = bb.southwestCorner.lng
+    elif cur:
+        center_lat = cur["point"]["lat"]
+        center_lng = cur["point"]["lng"]
+        bb_ne_lat = center_lat + 0.05
+        bb_ne_lng = center_lng + 0.05
+        bb_sw_lat = center_lat - 0.05
+        bb_sw_lng = center_lng - 0.05
+    else:
+        center_lat = 0
+        center_lng = 0
+        bb_ne_lat = bb_ne_lng = bb_sw_lat = bb_sw_lng = 0
 
     html = _HTML_TEMPLATE.format(
         total_count=result.totalCount,
@@ -77,10 +105,10 @@ def display_routes_map(
         sidebar_items=sidebar_items_html,
         routes_js=routes_js,
         cur_js=cur_js,
-        bb_ne_lat=bb.northeastCorner.lat,
-        bb_ne_lng=bb.northeastCorner.lng,
-        bb_sw_lat=bb.southwestCorner.lat,
-        bb_sw_lng=bb.southwestCorner.lng,
+        bb_ne_lat=bb_ne_lat,
+        bb_ne_lng=bb_ne_lng,
+        bb_sw_lat=bb_sw_lat,
+        bb_sw_lng=bb_sw_lng,
     )
 
     with open(filename, "w", encoding="utf-8") as f:
