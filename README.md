@@ -4,7 +4,7 @@ Query the Strava suggested routes API and render the results on an interactive L
 
 ## Web app
 
-Open the [deployed page](https://noham.github.io/strava-route-map) in a browser. Authenticate with your Strava email (OTP flow), pick your route parameters, and browse suggested routes directly on the map.
+Open the [deployed page](https://nohamr.github.io/strava-route-map/web/) in a browser. Authenticate with your Strava email (OTP flow), pick your route parameters, and browse suggested routes directly on the map.
 
 The web app talks to Strava through a CORS proxy (`cors.noh.am`) and caches your bearer token in `localStorage`. It's a single HTML file at `web/index.html`.
 
