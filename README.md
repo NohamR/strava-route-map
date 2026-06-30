@@ -13,6 +13,9 @@
     <a href="https://github.com/NohamR/strava-route-map">
         <img src="https://img.shields.io/badge/status-active-brightgreen" alt="Status">
     </a>
+    <a href="https://deepwiki.com/NohamR/strava-route-map">
+        <img src="https://deepwiki.com/badge.svg" alt="Ask DeepWiki">
+    </a>
 </p>
 
 Query the Strava suggested routes API and render the results on an interactive Leaflet map.
