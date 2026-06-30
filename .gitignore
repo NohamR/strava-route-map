@@ -1,4 +1,7 @@
-.strava_token
+python/.strava_token
 __pycache__/
 *.pyc
-doc/.DS_Store
+python/routes_map.html
+.venv/
+python/.venv/
+.DS_Store
