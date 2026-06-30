@@ -13,10 +13,14 @@ interface LocationInputProps {
   onPositionChange: (lat: number, lng: number) => void
 }
 
-function MapClickHandler({ onPositionChange }: { onPositionChange: (lat: number, lng: number) => void }) {
+function MapClickHandler({ onLatChange, onLngChange, onPositionChange }: { onLatChange: (v: string) => void; onLngChange: (v: string) => void; onPositionChange: (lat: number, lng: number) => void }) {
   useMapEvents({
     click(e) {
-      onPositionChange(parseFloat(e.latlng.lat.toFixed(6)), parseFloat(e.latlng.lng.toFixed(6)))
+      const lat = e.latlng.lat.toFixed(6)
+      const lng = e.latlng.lng.toFixed(6)
+      onLatChange(lat)
+      onLngChange(lng)
+      onPositionChange(parseFloat(lat), parseFloat(lng))
     },
   })
   return null
@@ -117,7 +121,7 @@ export function LocationInput({ lat, lng, onLatChange, onLngChange, onPositionCh
               subdomains="abcd"
               maxZoom={20}
             />
-            <MapClickHandler onPositionChange={onPositionChange} />
+            <MapClickHandler onLatChange={onLatChange} onLngChange={onLngChange} onPositionChange={onPositionChange} />
             {hasPosition && (
               <>
                 <Marker position={[latNum, lngNum]} icon={markerIcon} draggable={true}
