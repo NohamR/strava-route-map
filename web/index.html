@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="h-full">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -9,920 +9,187 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<style>
-*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  background: #f6f2ed; color: #1a1614;
-}
-html, body, .app { height: 100%; overflow: hidden; }
-.app { display: flex; }
-
-/* -- sidebar -- */
-.sidebar {
-  width: 350px; min-width: 350px;
-  background: #f6f2ed;
-  display: flex; flex-direction: column;
-  border-right: 1px solid #d8d2ca;
-  box-shadow: 3px 0 16px rgba(0,0,0,.07);
-  position: relative; z-index: 1;
-}
-.sidebar-header {
-  padding: 14px 16px 12px;
-  border-bottom: 1px solid #d8d2ca;
-  flex-shrink: 0;
-}
-.header-eyebrow {
-  font-size: 9px; font-weight: 700; letter-spacing: 0.14em;
-  text-transform: uppercase; color: #a89f97;
-  margin-bottom: 4px; font-family: 'JetBrains Mono', monospace;
-}
-.sidebar-header h1 {
-  font-size: 14px; font-weight: 700; color: #1a1614;
-  letter-spacing: -0.02em; line-height: 1;
-}
-.sidebar-header .header-subtitle {
-  font-size: 10px; color: #a89f97; margin-top: 3px;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-}
-.sidebar-body { flex: 1; overflow-y: auto; }
-.sidebar-body::-webkit-scrollbar { width: 3px; }
-.sidebar-body::-webkit-scrollbar-track { background: transparent; }
-.sidebar-body::-webkit-scrollbar-thumb { background: #c4bcb4; border-radius: 2px; }
-
-/* -- auth -- */
-.auth-section {
-  padding: 12px 16px;
-  border-bottom: 1px solid #e4dfd8;
-  display: flex; align-items: center; gap: 8px;
-  flex-wrap: wrap;
-}
-.auth-section .btn { font-size: 10px; padding: 5px 10px; }
-.auth-input { flex: 1; min-width: 120px; }
-.auth-input input {
-  width: 100%; padding: 5px 8px; font-size: 12px;
-  font-family: 'JetBrains Mono', monospace;
-  border: 1px solid #d8d2ca; border-radius: 4px; outline: none;
-  background: #fff; color: #1a1614;
-}
-.auth-input input:focus { border-color: #fc4c02; }
-.auth-status {
-  font-size: 10px; font-weight: 600; color: #4daf4a;
-  display: flex; align-items: center; gap: 6px;
-}
-.auth-status .logout {
-  color: #a89f97; cursor: pointer; font-weight: 400;
-  text-decoration: underline; font-size: 9px;
-}
-.auth-error { color: #e41a1c; font-size: 10px; width: 100%; margin-top: 4px; }
-
-/* -- form -- */
-.form-view { padding: 12px 16px; }
-.form-section { margin-bottom: 14px; }
-.form-section-title {
-  font-size: 10px; font-weight: 700; text-transform: uppercase;
-  letter-spacing: 0.06em; color: #a89f97; margin-bottom: 10px;
-}
-.form-row { margin-bottom: 10px; }
-.form-row:last-child { margin-bottom: 0; }
-.form-row label {
-  display: block; font-size: 10px; font-weight: 600;
-  color: #6b6158; margin-bottom: 4px;
-  text-transform: uppercase; letter-spacing: 0.04em;
-}
-.form-row label .required { color: #e41a1c; }
-.form-row input, .form-row select {
-  width: 100%; padding: 6px 8px; font-size: 12px;
-  font-family: 'JetBrains Mono', 'Courier New', monospace;
-  border: 1px solid #d8d2ca; border-radius: 4px;
-  background: #fff; color: #1a1614; outline: none;
-  transition: border-color .15s ease;
-}
-.form-row input:focus, .form-row select:focus { border-color: #fc4c02; }
-.form-row input::placeholder { color: #c4bcb4; }
-.form-row .hint { font-size: 9px; color: #a89f97; margin-top: 3px; }
-.inline-group { display: flex; gap: 6px; }
-.inline-group input { flex: 1; }
-.checkbox-row {
-  display: flex; align-items: center; gap: 6px; margin-top: 6px;
-}
-.checkbox-row input[type="checkbox"] { width: auto; }
-.checkbox-row label {
-  display: inline; font-size: 11px; text-transform: none;
-  letter-spacing: 0; color: #3e3a35; font-weight: 400;
-}
-.collapsible { display: none; }
-.collapsible.open { display: block; }
-.collapsible .form-row { margin-top: 8px; }
-
-/* -- buttons -- */
-.btn {
-  display: inline-flex; align-items: center; gap: 5px;
-  padding: 7px 12px; font-family: 'Inter', sans-serif;
-  font-size: 11px; font-weight: 600; border: none;
-  border-radius: 4px; cursor: pointer;
-  transition: background .15s ease; white-space: nowrap;
-}
-.btn-primary { background: #fc4c02; color: #fff; }
-.btn-primary:hover { background: #e04402; }
-.btn-secondary { background: #ddd8d0; color: #3e3a35; }
-.btn-secondary:hover { background: #cec8be; }
-.btn-full { width: 100%; justify-content: center; padding: 9px; font-size: 12px; }
-.btn:disabled { opacity: .5; cursor: default; }
-.btn-primary:disabled:hover { background: #fc4c02; }
-.btn-secondary:disabled:hover { background: #ddd8d0; }
-
-/* -- route list -- */
-.results-view { display: flex; flex-direction: column; height: 100%; }
-.results-toolbar {
-  padding: 8px 16px; border-bottom: 1px solid #e4dfd8;
-  display: flex; gap: 6px; align-items: center;
-}
-.results-toolbar .btn { font-size: 10px; padding: 5px 10px; }
-#route-list { flex: 1; overflow-y: auto; list-style: none; }
-#route-list::-webkit-scrollbar { width: 3px; }
-#route-list::-webkit-scrollbar-track { background: transparent; }
-#route-list::-webkit-scrollbar-thumb { background: #c4bcb4; border-radius: 2px; }
-.route-item {
-  display: flex; align-items: flex-start; gap: 10px;
-  padding: 10px 13px 10px 12px; cursor: pointer;
-  border-left: 3px solid transparent;
-  border-bottom: 1px solid #e4dfd8;
-  transition: background .11s ease, border-left-color .13s ease;
-}
-.route-item:last-child { border-bottom: none; }
-.route-item:hover { background: #ede9e3; border-left-color: #cac3ba; }
-.route-item.active { background: #e8e3dc; border-left-color: var(--acolor); }
-.route-dot-wrap {
-  flex-shrink: 0; width: 14px; height: 14px;
-  display: flex; align-items: center; justify-content: center; margin-top: 2px;
-}
-.route-color {
-  width: 8px; height: 8px; border-radius: 50%;
-  transition: transform .15s ease, box-shadow .15s ease;
-}
-.route-item:hover .route-color { transform: scale(1.25); }
-.route-item.active .route-color {
-  transform: scale(1.3);
-  box-shadow: 0 0 0 2.5px #f6f2ed, 0 0 0 4.5px var(--acolor);
-}
-.route-info { flex: 1; min-width: 0; }
-.route-title {
-  font-size: 11px; font-weight: 600; color: #1a1614;
-  line-height: 1.45; display: -webkit-box;
-  -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
-}
-.route-meta { display: flex; flex-wrap: wrap; gap: 3px; margin-top: 4px; }
-.meta-tag {
-  font-family: 'JetBrains Mono', 'Courier New', monospace;
-  font-size: 9px; font-weight: 500; color: #6b6158;
-  background: #ddd8d0; padding: 1.5px 4px; border-radius: 3px;
-  white-space: nowrap; line-height: 1.6;
-}
-.route-location {
-  font-size: 9px; color: #a89f97; margin-top: 3px;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-}
-.route-eta {
-  flex-shrink: 0; align-self: flex-start; margin-top: 1px;
-  font-family: 'JetBrains Mono', monospace; font-size: 9px;
-  font-weight: 500; color: #3e3a35; background: #ddd8d0;
-  padding: 2px 5px; border-radius: 3px; white-space: nowrap;
-}
-
-/* -- map -- */
-#map { flex: 1; height: 100%; }
-
-/* -- loading -- */
-.loading {
-  display: none; align-items: center; justify-content: center;
-  gap: 8px; padding: 20px; font-size: 12px; color: #6b6158;
-}
-.loading.active { display: flex; }
-
-/* -- toast -- */
-.toast {
-  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
-  background: #1a1614; color: #fff; padding: 8px 16px;
-  border-radius: 5px; font-size: 11px; font-weight: 500;
-  opacity: 0; transition: opacity .2s ease; pointer-events: none; z-index: 9999;
-}
-.toast.show { opacity: 1; }
-.toast.error { background: #e41a1c; }
-
-/* -- empty state -- */
-.empty-state {
-  padding: 30px 20px; text-align: center; color: #a89f97; font-size: 12px;
-  line-height: 1.6;
-}
-</style>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="style.css">
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      fontFamily: {
+        sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+        mono: ['JetBrains Mono', 'Courier New', 'monospace'],
+      },
+      colors: {
+        strava: '#fc4c02',
+        cream: '#f6f2ed',
+        stone: '#1a1614',
+      },
+    },
+  },
+};
+</script>
 </head>
-<body>
-<div class="app">
-  <div class="sidebar">
-    <div class="sidebar-header">
-      <div class="header-eyebrow" id="header-eyebrow">Strava Routes</div>
-      <h1>Route Explorer</h1>
-      <div class="header-subtitle" id="header-subtitle"></div>
+<body class="h-full bg-cream text-stone font-sans antialiased">
+
+<!-- Full-viewport map for results -->
+<div id="map-results" class="fixed inset-0 hidden z-0"></div>
+
+<!-- Form mode -->
+<div id="form-mode" class="min-h-full overflow-y-auto">
+  <div class="w-full max-w-[640px] mx-auto px-4 py-8 space-y-4">
+
+    <!-- Header -->
+    <div>
+      <h1 class="text-lg font-bold tracking-tight">Strava Route Explorer</h1>
+      <p class="text-xs text-[#a89f97] mt-0.5">Find suggested routes from Strava</p>
     </div>
 
-    <div class="auth-section" id="auth-section">
-      <div id="auth-authenticated" style="display:none">
-        <span class="auth-status">&#10003; Authenticated <span class="logout" onclick="logout()">log out</span></span>
+    <!-- Auth -->
+    <div class="bg-white rounded-lg shadow-sm border border-[#d8d2ca] p-4">
+      <div id="auth-authenticated" class="flex items-center min-h-[44px]" style="display:none">
+        <span class="leading-none text-xs font-semibold text-[#4daf4a]">&#10003; Authenticated</span>
+        <span class="ml-2 text-[#a89f97] cursor-pointer font-normal underline text-[10px]" onclick="logout()">log out</span>
       </div>
-      <div id="auth-unauthenticated" style="display:flex;gap:6px;flex:1;flex-wrap:wrap">
-        <div class="auth-input" style="flex:2;min-width:140px">
-          <input type="email" id="auth-email" placeholder="Strava email" autocomplete="email">
-        </div>
-        <div class="auth-input" id="otp-field" style="display:none;flex:1;min-width:100px">
-          <input type="text" id="auth-otp" placeholder="OTP code" autocomplete="off">
-        </div>
-        <button class="btn btn-primary" id="auth-btn" onclick="handleAuth()">Send OTP</button>
+      <div id="auth-unauthenticated" class="flex gap-2 flex-wrap items-center" style="display:flex">
+        <input type="email" id="auth-email" placeholder="Strava email" autocomplete="email"
+          class="flex-1 min-w-[160px] sm:min-w-[180px] px-2.5 py-1.5 text-sm font-mono border border-[#d8d2ca] rounded bg-white text-stone outline-none focus:border-strava placeholder:text-[#c4bcb4]">
+        <input type="text" id="auth-otp" placeholder="OTP code" autocomplete="off"
+          class="hidden flex-1 min-w-[90px] px-2.5 py-1.5 text-sm font-mono border border-[#d8d2ca] rounded bg-white text-stone outline-none focus:border-strava placeholder:text-[#c4bcb4]">
+        <button class="btn-primary text-xs px-3 py-1.5" id="auth-btn" onclick="handleAuth()">Send OTP</button>
       </div>
-      <div class="auth-error" id="auth-error"></div>
+      <div class="text-[#e41a1c] text-xs mt-1" id="auth-error"></div>
     </div>
 
-    <div class="sidebar-body" id="sidebar-body">
-      <div class="form-view" id="form-view">
-        <div class="form-section">
-          <div class="form-section-title">Location</div>
-          <div class="form-row">
-            <label>Latitude <span class="required">*</span></label>
-            <div class="inline-group">
-              <input type="number" id="lat" step="any" placeholder="e.g. 48.6882">
-              <input type="number" id="lng" step="any" placeholder="e.g. 2.1854">
-              <button class="btn btn-secondary" onclick="detectLocation()" title="Auto-detect" style="font-size:16px;padding:6px 10px;">&#8982;</button>
-            </div>
-            <div class="hint" id="loc-status">Click the map, enter coords, or use auto-detect</div>
+    <!-- Location card -->
+    <div class="bg-white rounded-lg shadow-sm border border-[#d8d2ca] p-4 space-y-3">
+      <div class="text-xs font-bold uppercase tracking-[0.06em] text-[#a89f97]">Location</div>
+      <div>
+        <label class="block text-xs font-semibold text-[#6b6158] uppercase tracking-[0.04em] mb-1">Latitude <span class="text-[#e41a1c]">*</span></label>
+        <div class="flex flex-nowrap gap-1.5">
+          <input type="number" id="lat" step="any" placeholder="Lat"
+            class="w-[70px] sm:flex-1 sm:min-w-0 px-2 py-1.5 sm:px-2.5 text-sm font-mono border border-[#d8d2ca] rounded bg-white text-stone outline-none focus:border-strava placeholder:text-[#c4bcb4]">
+          <input type="number" id="lng" step="any" placeholder="Lng"
+            class="w-[70px] sm:flex-1 sm:min-w-0 px-2 py-1.5 sm:px-2.5 text-sm font-mono border border-[#d8d2ca] rounded bg-white text-stone outline-none focus:border-strava placeholder:text-[#c4bcb4]">
+          <button class="btn-secondary text-sm sm:text-lg px-1.5 py-1 sm:px-2.5 sm:py-1 shrink-0" onclick="detectLocation()" title="Auto-detect">&#8982;</button>
+        </div>
+        <div class="text-[10px] text-[#a89f97] mt-1" id="loc-status">Click the map, enter coords, or use auto-detect</div>
+      </div>
+      <div id="map-form" class="h-[200px] md:h-[260px] rounded-lg border border-[#d8d2ca] z-0"></div>
+    </div>
+
+    <!-- Route card -->
+    <div class="bg-white rounded-lg shadow-sm border border-[#d8d2ca] p-4 space-y-3">
+      <div class="text-xs font-bold uppercase tracking-[0.06em] text-[#a89f97]">Route</div>
+      <div>
+        <label class="block text-xs font-semibold text-[#6b6158] uppercase tracking-[0.04em] mb-1">Route Type <span class="text-[#e41a1c]">*</span></label>
+        <select id="route-type" class="w-full px-2.5 py-1.5 text-sm font-mono border border-[#d8d2ca] rounded bg-white text-stone outline-none focus:border-strava">
+          <option value="">-- Select --</option>
+          <option value="Run">Run</option>
+          <option value="TrailRun">Trail Run</option>
+          <option value="Walk">Walk</option>
+          <option value="Hike">Hike</option>
+          <option value="Ride">Ride</option>
+          <option value="MountainBikeRide">Mountain Bike</option>
+          <option value="GravelRide">Gravel Ride</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-xs font-semibold text-[#6b6158] uppercase tracking-[0.04em] mb-1">Difficulty</label>
+        <select id="difficulty" class="w-full px-2.5 py-1.5 text-sm font-mono border border-[#d8d2ca] rounded bg-white text-stone outline-none focus:border-strava">
+          <option value="Undefined">Any</option>
+          <option value="Easy">Easy</option>
+          <option value="Moderate">Moderate</option>
+          <option value="Hard">Hard</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-xs font-semibold text-[#6b6158] uppercase tracking-[0.04em] mb-1">Min Elevation (m)</label>
+        <input type="number" id="elevation" placeholder="0"
+          class="w-full px-2.5 py-1.5 text-sm font-mono border border-[#d8d2ca] rounded bg-white text-stone outline-none focus:border-strava placeholder:text-[#c4bcb4]">
+      </div>
+      <div>
+        <label class="block text-xs font-semibold text-[#6b6158] uppercase tracking-[0.04em] mb-1">Target Distance (km)</label>
+        <input type="number" id="distance" step="any" placeholder="-1 (no preference)"
+          class="w-full px-2.5 py-1.5 text-sm font-mono border border-[#d8d2ca] rounded bg-white text-stone outline-none focus:border-strava placeholder:text-[#c4bcb4]">
+      </div>
+    </div>
+
+    <!-- Bounding box card -->
+    <div class="bg-white rounded-lg shadow-sm border border-[#d8d2ca] p-4 space-y-3">
+      <div class="text-xs font-bold uppercase tracking-[0.06em] text-[#a89f97]">Bounding Box <span class="font-normal normal-case text-[#c4bcb4] text-[10px] tracking-normal">(optional)</span></div>
+      <div class="flex items-center gap-2">
+        <input type="checkbox" id="custom-bbox" class="w-auto">
+        <label for="custom-bbox" class="text-sm text-[#3e3a35] font-normal">Set custom bounding box</label>
+      </div>
+      <div class="hidden space-y-2" id="bbox-fields">
+        <div>
+          <label class="block text-xs font-semibold text-[#6b6158] uppercase tracking-[0.04em] mb-1">NE Corner (lat, lng)</label>
+          <div class="flex gap-1.5">
+            <input type="number" id="bbox-ne-lat" step="any" placeholder="lat"
+              class="w-[80px] sm:flex-1 px-2 py-1.5 sm:px-2.5 text-sm font-mono border border-[#d8d2ca] rounded bg-white text-stone outline-none focus:border-strava placeholder:text-[#c4bcb4]">
+            <input type="number" id="bbox-ne-lng" step="any" placeholder="lng"
+              class="w-[80px] sm:flex-1 px-2 py-1.5 sm:px-2.5 text-sm font-mono border border-[#d8d2ca] rounded bg-white text-stone outline-none focus:border-strava placeholder:text-[#c4bcb4]">
           </div>
         </div>
-
-        <div class="form-section">
-          <div class="form-section-title">Route</div>
-          <div class="form-row">
-            <label>Route Type <span class="required">*</span></label>
-            <select id="route-type">
-              <option value="">-- Select --</option>
-              <option value="Run">Run</option>
-              <option value="TrailRun">Trail Run</option>
-              <option value="Walk">Walk</option>
-              <option value="Hike">Hike</option>
-              <option value="Ride">Ride</option>
-              <option value="MountainBikeRide">Mountain Bike</option>
-              <option value="GravelRide">Gravel Ride</option>
-            </select>
+        <div>
+          <label class="block text-xs font-semibold text-[#6b6158] uppercase tracking-[0.04em] mb-1">SW Corner (lat, lng)</label>
+          <div class="flex gap-1.5">
+            <input type="number" id="bbox-sw-lat" step="any" placeholder="lat"
+              class="w-[80px] sm:flex-1 px-2 py-1.5 sm:px-2.5 text-sm font-mono border border-[#d8d2ca] rounded bg-white text-stone outline-none focus:border-strava placeholder:text-[#c4bcb4]">
+            <input type="number" id="bbox-sw-lng" step="any" placeholder="lng"
+              class="w-[80px] sm:flex-1 px-2 py-1.5 sm:px-2.5 text-sm font-mono border border-[#d8d2ca] rounded bg-white text-stone outline-none focus:border-strava placeholder:text-[#c4bcb4]">
           </div>
-          <div class="form-row">
-            <label>Difficulty</label>
-            <select id="difficulty">
-              <option value="Undefined">Any</option>
-              <option value="Easy">Easy</option>
-              <option value="Moderate">Moderate</option>
-              <option value="Hard">Hard</option>
-            </select>
-          </div>
-          <div class="form-row">
-            <label>Min Elevation (m)</label>
-            <input type="number" id="elevation" placeholder="0">
-          </div>
-          <div class="form-row">
-            <label>Target Distance (km)</label>
-            <input type="number" id="distance" step="any" placeholder="-1 (no preference)">
-          </div>
-        </div>
-
-        <div class="form-section">
-          <div class="form-section-title">Bounding Box <span style="font-weight:400;text-transform:none;color:#c4bcb4;font-size:10px;letter-spacing:0">(optional)</span></div>
-          <div class="checkbox-row">
-            <input type="checkbox" id="custom-bbox">
-            <label for="custom-bbox">Set custom bounding box</label>
-          </div>
-          <div class="collapsible" id="bbox-fields">
-            <div class="form-row">
-              <label>NE Corner (lat, lng)</label>
-              <div class="inline-group">
-                <input type="number" id="bbox-ne-lat" step="any" placeholder="lat">
-                <input type="number" id="bbox-ne-lng" step="any" placeholder="lng">
-              </div>
-            </div>
-            <div class="form-row">
-              <label>SW Corner (lat, lng)</label>
-              <div class="inline-group">
-                <input type="number" id="bbox-sw-lat" step="any" placeholder="lat">
-                <input type="number" id="bbox-sw-lng" step="any" placeholder="lng">
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <button class="btn btn-primary btn-full" onclick="findRoutes()" id="find-btn">Find Routes</button>
-        <div class="loading" id="loading-bar">
-          <span>Loading...</span>
         </div>
       </div>
+    </div>
 
-      <div class="results-view" id="results-view" style="display:none">
-        <div class="results-toolbar">
-          <button class="btn btn-secondary" onclick="showForm()">&#8592; New Search</button>
-          <button class="btn btn-secondary" onclick="fitAllRoutes()" title="Fit all routes to view" style="font-size:14px;">&#8964;&#9000;</button>
-        </div>
-        <ul id="route-list"></ul>
-      </div>
+    <!-- Find button -->
+    <button class="btn-primary w-full justify-center py-3 text-sm font-bold" onclick="findRoutes()" id="find-btn">Find Routes</button>
+    <div id="loading-bar" class="hidden items-center justify-center gap-2 py-4 text-sm text-[#6b6158]">
+      <span>Loading...</span>
     </div>
   </div>
-  <div id="map"></div>
 </div>
-<div class="toast" id="toast"></div>
 
-<script>
-// ===== CONSTANTS =====
-var PROXY = 'https://cors.noh.am/?';
-var AUTH_BASE = 'https://cdn-1.strava.com/api/v3/oauth';
-var GRAPHQL_URL = 'https://graphql.strava.com/';
-var CLIENT_SECRET = '0012dc03a59bfd0340b1c75763e6e880985816a3';
-var COLORS = ['#e41a1c','#377eb8','#4daf4a','#984ea3','#ff7f00','#a65628','#f781bf'];
-var TOKEN_KEY = 'strava_token';
-var SUGGESTED_ROUTES_QUERY = 'query SuggestedRoutes($args: SuggestedRouteOptionsInput!, $first: Int, $after: Cursor, $resolutions: [FlatmapResolutionInput!]!, $minSizeDesired: Short!, $lookupOptions: LookupOptionsInput) { suggestedRoutesBySourceGeo(args: $args, first: $first, after: $after) { __typename routes { __typename nodes { __typename ... on SuggestedRoute { elevationGain completionTimeEstimation { __typename expectedTime } length locationSummary(lookupOptions: $lookupOptions) routeSource title routeType routeUrl routeDetails { __typename overallDifficulty } themedMapImages(resolutions: $resolutions) { __typename darkUrl lightUrl } routePolylineData { __typename media(limit: 3, preferUnique: true) { __typename mediaDetails { __typename ... on Photo { imageUrlWithMetadata(minSizeDesired: $minSizeDesired) { __typename imageUrl size { __typename height width } } imageUrl(minSizeDesired: $minSizeDesired) } } } } legs { __typename paths { __typename polyline { __typename data } } } } } pageInfo { __typename hasNextPage endCursor } } totalCount adjustedBoundingBox { __typename northeastCorner { __typename lat lng } southwestCorner { __typename lat lng } } pointSourceType { __typename searchPoint { __typename point { __typename lat lng } } droppedPin { __typename point { __typename lng lat } } currentLocation { __typename point { __typename lng lat } } } } }';
+<!-- Backdrop for mobile panel -->
+<div id="panel-backdrop" class="fixed inset-0 bg-black/30 z-20 hidden" onclick="closePanel()"></div>
 
-// ===== STATE =====
-var map, marker, locationMarker;
-var routesData = [];
-var polylines = [];
-var activeIndex = -1;
-var otpState = null;
+<!-- Results panel -->
+<div id="results-panel" class="fixed top-0 right-0 bottom-0 z-30 bg-cream shadow-lg transition-transform duration-300
+  w-full sm:w-[380px] md:w-[340px]
+  translate-x-full hidden
+  md:border-l border-[#d8d2ca]">
+  <div class="flex items-center gap-2 px-4 py-2.5 border-b border-[#e4dfd8] shrink-0">
+    <button class="btn-secondary text-xs px-2.5 py-1" onclick="showFormView()">&#8592; New Search</button>
+    <button class="btn-secondary text-xs px-2.5 py-1" onclick="fitAllRoutes()">All routes</button>
+    <button class="md:hidden ml-auto btn-secondary text-xs px-2 py-1" onclick="closePanel()">&#10005;</button>
+  </div>
+  <div class="text-[10px] font-bold uppercase tracking-[0.14em] text-[#a89f97] px-4 pt-2 pb-1 font-mono" id="results-header"></div>
+  <ul id="route-list" class="flex-1 overflow-y-auto list-none"></ul>
+</div>
 
-// ===== INIT =====
-function init() {
-  var wasAuthed = getToken();
-  updateAuthUI(wasAuthed);
+<!-- Floating action button (mobile only) -->
+<button id="panel-fab" class="fixed bottom-5 right-5 z-20 w-12 h-12 rounded-full bg-strava text-white shadow-lg items-center justify-center text-xl hidden md:hidden" onclick="togglePanel()">&#9776;</button>
 
-  map = L.map('map', { zoomControl: true }).setView([20, 0], 2);
+<!-- Lightbox -->
+<div class="lightbox" id="lightbox" onclick="closeLightbox()">
+  <button class="close-btn" onclick="event.stopPropagation();closeLightbox()">&times;</button>
+  <img src="" alt="Route image">
+</div>
 
-  var osm = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-    maxZoom: 19,
-  });
-  var topo = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', {
-    attribution: '&copy; <a href="https://www.esri.com/">Esri</a>',
-    maxZoom: 19,
-  });
-  var street = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; <a href="https://carto.com/">CARTO</a>',
-    subdomains: 'abcd', maxZoom: 20,
-  });
-  var dark = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; <a href="https://carto.com/">CARTO</a>',
-    subdomains: 'abcd', maxZoom: 20,
-  });
-  var satellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-    attribution: '&copy; <a href="https://www.esri.com/">Esri</a>',
-    maxZoom: 19,
-  });
-  var hybrid = L.layerGroup([
-    satellite,
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}{r}.png', {
-      attribution: '&copy; <a href="https://carto.com/">CARTO</a>',
-      subdomains: 'abcd', maxZoom: 20, opacity: 0.85,
-    }),
-  ]);
+<!-- Toast -->
+<div id="toast"></div>
 
-  osm.addTo(map);
-  L.control.layers({'OSM': osm, 'Topo': topo, 'Street': street, 'Dark': dark, 'Satellite': satellite, 'Hybrid': hybrid}, null, { position: 'bottomleft' }).addTo(map);
+<style>
+.btn-primary, .btn-secondary { display: inline-flex; align-items: center; gap: 0.25rem; font-family: 'Inter', sans-serif; font-weight: 600; border: none; border-radius: 0.375rem; cursor: pointer; transition: background .15s; white-space: nowrap; }
+.btn-primary { background: #fc4c02; color: #fff; }
+.btn-primary:hover { background: #e04402; }
+.btn-primary:disabled { opacity: .5; cursor: default; }
+.btn-primary:disabled:hover { background: #fc4c02; }
+.btn-secondary { background: #ddd8d0; color: #3e3a35; }
+.btn-secondary:hover { background: #cec8be; }
+</style>
 
-  map.on('click', function(e) {
-    var lat = e.latlng.lat.toFixed(6);
-    var lng = e.latlng.lng.toFixed(6);
-    document.getElementById('lat').value = lat;
-    document.getElementById('lng').value = lng;
-    placePickerMarker(parseFloat(lat), parseFloat(lng));
-  });
-
-  document.getElementById('lat').addEventListener('change', function() {
-    var lat = parseFloat(this.value);
-    var lng = parseFloat(document.getElementById('lng').value);
-    if (!isNaN(lat) && !isNaN(lng)) placePickerMarker(lat, lng);
-  });
-  document.getElementById('lng').addEventListener('change', function() {
-    var lat = parseFloat(document.getElementById('lat').value);
-    var lng = parseFloat(this.value);
-    if (!isNaN(lat) && !isNaN(lng)) placePickerMarker(lat, lng);
-  });
-
-  document.getElementById('custom-bbox').addEventListener('change', function() {
-    document.getElementById('bbox-fields').classList.toggle('open', this.checked);
-  });
-}
-
-function placePickerMarker(lat, lng) {
-  if (marker) map.removeLayer(marker);
-  marker = L.marker([lat, lng], { draggable: true }).addTo(map);
-  marker.on('dragend', function() {
-    var pos = marker.getLatLng();
-    document.getElementById('lat').value = pos.lat.toFixed(6);
-    document.getElementById('lng').value = pos.lng.toFixed(6);
-  });
-  map.setView([lat, lng], 13);
-}
-
-// ===== AUTH =====
-function getToken() { return localStorage.getItem(TOKEN_KEY); }
-function setToken(t) { localStorage.setItem(TOKEN_KEY, t); }
-function clearToken() { localStorage.removeItem(TOKEN_KEY); }
-
-function updateAuthUI(hasToken) {
-  document.getElementById('auth-authenticated').style.display = hasToken ? 'flex' : 'none';
-  document.getElementById('auth-unauthenticated').style.display = hasToken ? 'none' : 'flex';
-  document.getElementById('auth-error').textContent = '';
-}
-
-function logout() {
-  clearToken();
-  updateAuthUI(false);
-  otpState = null;
-  document.getElementById('auth-email').value = '';
-  document.getElementById('auth-otp').value = '';
-  document.getElementById('otp-field').style.display = 'none';
-  document.getElementById('auth-btn').textContent = 'Send OTP';
-  showToast('Logged out');
-}
-
-async function handleAuth() {
-  var email = document.getElementById('auth-email').value.trim();
-  if (!email) { showAuthError('Enter your email'); return; }
-
-  var btn = document.getElementById('auth-btn');
-  var otpField = document.getElementById('otp-field');
-  var otpInput = document.getElementById('auth-otp');
-
-  if (btn.textContent === 'Send OTP') {
-    btn.disabled = true;
-    btn.textContent = 'Sending...';
-    try {
-      otpState = await requestOtp(email);
-      otpField.style.display = 'block';
-      btn.textContent = 'Verify';
-      btn.disabled = false;
-      showAuthError('');
-    } catch (err) {
-      showAuthError('Failed to send OTP: ' + err.message);
-      btn.textContent = 'Send OTP';
-      btn.disabled = false;
-    }
-  } else {
-    var otp = otpInput.value.trim();
-    if (!otp) { showAuthError('Enter the OTP code'); return; }
-    btn.disabled = true;
-    btn.textContent = 'Verifying...';
-    try {
-      var token = await loginWithOtp(email, otpState, otp);
-      setToken(token);
-      updateAuthUI(true);
-      otpField.style.display = 'none';
-      otpInput.value = '';
-      btn.textContent = 'Send OTP';
-      btn.disabled = false;
-      showAuthError('');
-      showToast('Authenticated successfully');
-    } catch (err) {
-      showAuthError('Verification failed: ' + err.message);
-      btn.textContent = 'Verify';
-      btn.disabled = false;
-    }
-  }
-}
-
-function showAuthError(msg) {
-  document.getElementById('auth-error').textContent = msg;
-}
-
-async function requestOtp(email) {
-  var url = PROXY + AUTH_BASE + '/request_otp?hl=en';
-  var resp = await fetch(url, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'User-Agent': 'Strava 422.0.1 (49113)|iPhone|iPhone10,1|iOS|16.7.15|en-FR',
-      'x-strava-nav-version': '2',
-      'time-offset-seconds': String(-new Date().getTimezoneOffset() * 60),
-    },
-    body: JSON.stringify({ email: email, client_id: '1', logging_in: true }),
-  });
-  if (!resp.ok) {
-    var text = await resp.text();
-    throw new Error(resp.status + ': ' + text.slice(0, 100));
-  }
-  var data = await resp.json();
-  return data.otp_state;
-}
-
-async function loginWithOtp(email, state, otp) {
-  var url = PROXY + AUTH_BASE + '/login/otp?hl=en';
-  var resp = await fetch(url, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'User-Agent': 'Strava 422.0.1 (49113)|iPhone|iPhone10,1|iOS|16.7.15|en-FR',
-      'x-strava-nav-version': '2',
-      'time-offset-seconds': String(-new Date().getTimezoneOffset() * 60),
-    },
-    body: JSON.stringify({
-      email: email,
-      otp_state: state,
-      client_id: '1',
-      otp: otp,
-      client_secret: CLIENT_SECRET,
-    }),
-  });
-  if (!resp.ok) {
-    var text = await resp.text();
-    throw new Error(resp.status + ': ' + text.slice(0, 100));
-  }
-  var data = await resp.json();
-  return data.access_token;
-}
-
-// ===== POLYLINE DECODER =====
-function decodePolyline(str) {
-  var index = 0, lat = 0, lng = 0;
-  var coords = [];
-  while (index < str.length) {
-    var result = 0, shift = 0, b;
-    do {
-      b = str.charCodeAt(index++) - 63;
-      result |= (b & 0x1f) << shift;
-      shift += 5;
-    } while (b >= 0x20);
-    var dlat = ((result & 1) ? ~(result >> 1) : (result >> 1));
-    lat += dlat;
-    result = 0; shift = 0;
-    do {
-      b = str.charCodeAt(index++) - 63;
-      result |= (b & 0x1f) << shift;
-      shift += 5;
-    } while (b >= 0x20);
-    var dlng = ((result & 1) ? ~(result >> 1) : (result >> 1));
-    lng += dlng;
-    coords.push([lat * 1e-5, lng * 1e-5]);
-  }
-  return coords;
-}
-
-// ===== GRAPHQL =====
-function buildVariables(lat, lng, routeType, difficulty, elevation, targetDistance, bboxArr) {
-  var offset = 0.05;
-  var bbox;
-  if (bboxArr) {
-    bbox = {
-      northeastCorner: { lat: bboxArr[0], lng: bboxArr[1] },
-      northwestCorner: { lat: bboxArr[0], lng: bboxArr[3] },
-      southeastCorner: { lat: bboxArr[2], lng: bboxArr[1] },
-      southwestCorner: { lat: bboxArr[2], lng: bboxArr[3] },
-    };
-  } else {
-    bbox = {
-      northeastCorner: { lat: lat + offset, lng: lng + offset },
-      northwestCorner: { lat: lat + offset, lng: lng - offset },
-      southeastCorner: { lat: lat - offset, lng: lng + offset },
-      southwestCorner: { lat: lat - offset, lng: lng - offset },
-    };
-  }
-
-  return {
-    args: {
-      prefs: {
-        difficulty: [difficulty],
-        elevation: elevation,
-        enforcePassThruSource: false,
-        routeTypes: [routeType],
-        surfaceType: 'Unknown',
-        targetDistance: targetDistance > 0 ? targetDistance * 1000 : -1,
-      },
-      source: {
-        boundingBoxWithPoint: {
-          boundingBox: bbox,
-          point: {
-            currentLocation: {
-              point: { lat: lat, lng: lng },
-            },
-          },
-        },
-      },
-    },
-    first: 15,
-    resolutions: [{ height: 512, width: 512 }],
-    minSizeDesired: 512,
-    lookupOptions: { locale: 'en', source: 'Mysql' },
-  };
-}
-
-async function fetchRoutes(token, variables) {
-  var url = PROXY + GRAPHQL_URL;
-  var resp = await fetch(url, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': 'Bearer ' + token,
-      'User-Agent': 'Strava 422.0.1 (49113)|iPhone|iPhone10,1|iOS|16.7.15|en-FR',
-      'apollographql-client-name': 'strava-ios',
-      'apollographql-client-version': '422.0.1-49113',
-      'X-APOLLO-OPERATION-TYPE': 'query',
-      'X-APOLLO-OPERATION-NAME': 'SuggestedRoutes',
-    },
-    body: JSON.stringify({
-      operationName: 'SuggestedRoutes',
-      query: SUGGESTED_ROUTES_QUERY,
-      variables: variables,
-    }),
-  });
-  var data = await resp.json();
-  if (data.errors) {
-    throw new Error(data.errors.map(function(e) { return e.message; }).join('; '));
-  }
-  return data.data.suggestedRoutesBySourceGeo;
-}
-
-// ===== MAP RENDERING =====
-function showResults(result) {
-  routesData = [];
-  polylines = [];
-  activeIndex = -1;
-  clearMapLayers();
-
-  var routes = result.routes.nodes;
-  var pageInfo = result.routes.pageInfo;
-  var totalCount = result.totalCount;
-  var adjustedBB = result.adjustedBoundingBox;
-  var pointSource = result.pointSourceType;
-  var curLoc = pointSource && pointSource.currentLocation;
-
-  document.getElementById('header-eyebrow').textContent = totalCount + ' routes';
-
-  routesData = routes.map(function(route, i) {
-    var coords = [];
-    if (route.legs) {
-      route.legs.forEach(function(leg) {
-        if (leg.paths) {
-          leg.paths.forEach(function(path) {
-            if (path.polyline && path.polyline.data) {
-              coords.push(decodePolyline(path.polyline.data));
-            }
-          });
-        }
-      });
-    }
-    var color = COLORS[i % COLORS.length];
-    var eta = route.completionTimeEstimation
-      ? Math.round(route.completionTimeEstimation.expectedTime / 60) + ' min'
-      : '';
-    var allLats = [], allLngs = [];
-    coords.forEach(function(seg) {
-      seg.forEach(function(p) { allLats.push(p[0]); allLngs.push(p[1]); });
-    });
-    var bounds = allLats.length ? [Math.min.apply(null, allLats), Math.max.apply(null, allLats), Math.min.apply(null, allLngs), Math.max.apply(null, allLngs)] : [0,0,0,0];
-    return {
-      index: i,
-      title: route.title || '',
-      type: route.routeType || '',
-      distanceKm: route.length ? (route.length / 1000).toFixed(1) : '0',
-      elevationM: route.elevationGain ? Math.round(route.elevationGain) : 0,
-      location: route.locationSummary || '',
-      eta: eta,
-      color: color,
-      bounds: bounds,
-      coords: coords,
-    };
-  });
-
-  var listEl = document.getElementById('route-list');
-  listEl.innerHTML = '';
-  routesData.forEach(function(d) {
-    var meta = d.type + ' \u00b7 ' + d.distanceKm + ' km \u00b7 ' + d.elevationM + ' m';
-    var etaHtml = d.eta ? '<div class="route-eta">' + d.eta + '</div>' : '';
-    var li = document.createElement('li');
-    li.className = 'route-item';
-    li.style.setProperty('--acolor', d.color);
-    li.dataset.index = d.index;
-    li.innerHTML =
-      '<div class="route-dot-wrap"><div class="route-color" style="background:' + d.color + '"></div></div>' +
-      '<div class="route-info">' +
-        '<div class="route-title">' + escapeHtml(d.title) + '</div>' +
-        '<div class="route-meta"></div>' +
-        '<div class="route-location">' + escapeHtml(d.location) + '</div>' +
-      '</div>' + etaHtml;
-    li.querySelector('.route-meta').appendChild(makeMetaTag(d.type));
-    li.querySelector('.route-meta').appendChild(makeMetaTag(d.distanceKm + ' km'));
-    li.querySelector('.route-meta').appendChild(makeMetaTag(d.elevationM + ' m'));
-    li.addEventListener('click', function() {
-      selectRoute(parseInt(this.dataset.index));
-    });
-    listEl.appendChild(li);
-  });
-
-  // draw polylines
-  routesData.forEach(function(d) {
-    var group = [];
-    d.coords.forEach(function(seg) {
-      var poly = L.polyline(seg, { color: d.color, weight: 4, opacity: 0.5, smoothFactor: 1.5 }).addTo(map);
-      poly.on('click', function() { selectRoute(d.index); });
-      group.push(poly);
-    });
-    polylines.push(group);
-  });
-
-  // current location marker
-  if (curLoc && curLoc.point) {
-    var p = curLoc.point;
-    locationMarker = L.marker([p.lat, p.lng], {
-      icon: L.divIcon({
-        className: '',
-        html: '<div style="background:red;width:16px;height:16px;border-radius:50%;border:3px solid white;box-shadow:0 0 4px rgba(0,0,0,.4)"></div>',
-        iconSize: [16, 16],
-        iconAnchor: [8, 8],
-      }),
-      zIndexOffset: 1000,
-    }).addTo(map).bindPopup('Current location');
-  }
-
-  // bounding box rectangle
-  if (adjustedBB) {
-    var ne = adjustedBB.northeastCorner;
-    var sw = adjustedBB.southwestCorner;
-    L.rectangle([[sw.lat, sw.lng], [ne.lat, ne.lng]], {
-      color: '#666', weight: 1, fill: false, interactive: false,
-    }).addTo(map);
-    map.fitBounds([[sw.lat, sw.lng], [ne.lat, ne.lng]], { padding: [40, 40], maxZoom: 14 });
-  } else if (curLoc && curLoc.point) {
-    var p = curLoc.point;
-    map.setView([p.lat, p.lng], 13);
-  }
-
-  // switch to results view
-  document.getElementById('form-view').style.display = 'none';
-  document.getElementById('results-view').style.display = 'flex';
-  document.getElementById('loading-bar').classList.remove('active');
-  document.getElementById('find-btn').disabled = false;
-}
-
-function clearMapLayers() {
-  if (locationMarker) { map.removeLayer(locationMarker); locationMarker = null; }
-  polylines.forEach(function(group) {
-    group.forEach(function(poly) { map.removeLayer(poly); });
-  });
-  polylines = [];
-  // remove rectangles
-  map.eachLayer(function(layer) {
-    if (layer instanceof L.Rectangle) map.removeLayer(layer);
-  });
-}
-
-function selectRoute(idx) {
-  activeIndex = (activeIndex === idx) ? -1 : idx;
-  updateVisibility();
-  document.querySelectorAll('.route-item').forEach(function(el, i) {
-    el.classList.toggle('active', i === activeIndex);
-  });
-  if (activeIndex >= 0) {
-    var b = routesData[activeIndex].bounds;
-    if (b[0] !== 0 || b[1] !== 0 || b[2] !== 0 || b[3] !== 0) {
-      map.fitBounds([[b[0], b[2]], [b[1], b[3]]], { padding: [40, 40], maxZoom: 15 });
-    }
-  } else {
-    fitAllRoutes();
-  }
-}
-
-function updateVisibility() {
-  routesData.forEach(function(r, i) {
-    polylines[i].forEach(function(poly) {
-      if (activeIndex === -1) {
-        poly.setStyle({ opacity: 0.5, weight: 4 }); poly.bringToBack();
-      } else if (i === activeIndex) {
-        poly.setStyle({ opacity: 1, weight: 5 }); poly.bringToFront();
-      } else {
-        poly.setStyle({ opacity: 0.12, weight: 2.5 }); poly.bringToBack();
-      }
-    });
-  });
-}
-
-function fitAllRoutes() {
-  if (!routesData.length) return;
-  var allLats = [], allLngs = [];
-  routesData.forEach(function(r) {
-    r.coords.forEach(function(seg) {
-      seg.forEach(function(p) { allLats.push(p[0]); allLngs.push(p[1]); });
-    });
-  });
-  if (allLats.length) {
-    map.fitBounds([
-      [Math.min.apply(null, allLats), Math.min.apply(null, allLngs)],
-      [Math.max.apply(null, allLats), Math.max.apply(null, allLngs)],
-    ], { padding: [40, 40], maxZoom: 14 });
-  }
-}
-
-// ===== FORM ACTIONS =====
-function showForm() {
-  document.getElementById('form-view').style.display = 'block';
-  document.getElementById('results-view').style.display = 'none';
-  document.getElementById('header-eyebrow').textContent = 'Strava Routes';
-}
-
-async function findRoutes() {
-  var token = getToken();
-  if (!token) { showToast('Authenticate first', true); return; }
-
-  var lat = document.getElementById('lat').value.trim();
-  var lng = document.getElementById('lng').value.trim();
-  var routeType = document.getElementById('route-type').value;
-  var difficulty = document.getElementById('difficulty').value;
-  var elevation = document.getElementById('elevation').value.trim();
-  var distance = document.getElementById('distance').value.trim();
-
-  if (!lat || !lng) { showToast('Enter a location', true); return; }
-  if (!routeType) { showToast('Select a route type', true); return; }
-
-  var latNum = parseFloat(lat);
-  var lngNum = parseFloat(lng);
-  var elevNum = parseInt(elevation) || 0;
-  var distNum = parseFloat(distance) || -1;
-
-  var bboxArr = null;
-  if (document.getElementById('custom-bbox').checked) {
-    var neLat = document.getElementById('bbox-ne-lat').value.trim();
-    var neLng = document.getElementById('bbox-ne-lng').value.trim();
-    var swLat = document.getElementById('bbox-sw-lat').value.trim();
-    var swLng = document.getElementById('bbox-sw-lng').value.trim();
-    if (neLat && neLng && swLat && swLng) {
-      bboxArr = [parseFloat(neLat), parseFloat(neLng), parseFloat(swLat), parseFloat(swLng)];
-    }
-  }
-
-  var btn = document.getElementById('find-btn');
-  var loading = document.getElementById('loading-bar');
-  btn.disabled = true;
-  loading.classList.add('active');
-
-  try {
-    var variables = buildVariables(latNum, lngNum, routeType, difficulty, elevNum, distNum, bboxArr);
-    var result = await fetchRoutes(token, variables);
-    showResults(result);
-  } catch (err) {
-    showToast('Error: ' + err.message, true);
-    btn.disabled = false;
-    loading.classList.remove('active');
-  }
-}
-
-function detectLocation() {
-  var status = document.getElementById('loc-status');
-  if (!navigator.geolocation) {
-    status.textContent = 'Geolocation not supported';
-    return;
-  }
-  status.textContent = 'Detecting...';
-  navigator.geolocation.getCurrentPosition(
-    function(pos) {
-      var lat = pos.coords.latitude.toFixed(6);
-      var lng = pos.coords.longitude.toFixed(6);
-      document.getElementById('lat').value = lat;
-      document.getElementById('lng').value = lng;
-      placePickerMarker(parseFloat(lat), parseFloat(lng));
-      status.textContent = 'Location detected';
-    },
-    function(err) {
-      status.textContent = 'Failed: ' + err.message;
-    },
-    { enableHighAccuracy: true, timeout: 10000 }
-  );
-}
-
-// ===== UTILS =====
-function makeMetaTag(text) {
-  var span = document.createElement('span');
-  span.className = 'meta-tag';
-  span.textContent = text;
-  return span;
-}
-
-function escapeHtml(s) {
-  var d = document.createElement('div');
-  d.appendChild(document.createTextNode(s));
-  return d.innerHTML;
-}
-
-function showToast(msg, isError) {
-  var el = document.getElementById('toast');
-  el.textContent = msg;
-  el.className = 'toast' + (isError ? ' error' : '');
-  el.classList.add('show');
-  clearTimeout(el._timeout);
-  el._timeout = setTimeout(function() { el.classList.remove('show'); }, 3000);
-}
-
-// ===== START =====
-init();
-</script>
+<script src="app.js"></script>
 </body>
 </html>
