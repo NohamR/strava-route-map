@@ -26,6 +26,8 @@ Open the [deployed page](https://nohamr.github.io/strava-route-map/) in a browse
 
 The web app talks to Strava through a CORS proxy (`cors.noh.am`) and caches your bearer token in `localStorage`.
 
+https://github.com/user-attachments/assets/128711e0-604e-4a28-afba-2d4cf283765f
+
 ## Python CLI
 
 See [python/README.md](python/README.md) for setup and usage.
