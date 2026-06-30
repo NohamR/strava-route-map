@@ -5,10 +5,12 @@ import { useRoutes } from '@/hooks/use-routes'
 import { SearchForm } from '@/components/search-form'
 import { ResultsView } from '@/components/results-view'
 import type { SearchParamsInput } from '@/lib/types'
+import { getStoredUnits, storeUnits, type UnitSystem } from '@/lib/utils'
 
 function App() {
   const [view, setView] = useState<'form' | 'results'>('form')
   const [lastParams, setLastParams] = useState<SearchParamsInput | null>(null)
+  const [units, setUnits] = useState<UnitSystem>(getStoredUnits)
   const auth = useAuth()
   const routes = useRoutes()
 
@@ -50,6 +52,8 @@ function App() {
           onNewSearch={handleNewSearch}
           onResearch={handleResearch}
           loading={routes.loading}
+          units={units}
+          onToggleUnits={() => setUnits((u) => { const next = u === 'metric' ? 'imperial' : 'metric'; storeUnits(next); return next })}
         />
         <Toaster position="bottom-center" />
       </>

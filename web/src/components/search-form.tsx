@@ -65,7 +65,7 @@ export function SearchForm({
   return (
     <div className="w-full max-w-[640px] mx-auto px-4 py-8 space-y-4">
       <div>
-        <h1 className="text-lg font-bold tracking-tight text-stone">Strava Route Explorer</h1>
+        <h1 className="text-lg font-bold tracking-tight text-stone">Strava Route Map</h1>
         <p className="text-xs text-[#a89f97] mt-0.5">Find suggested routes from Strava</p>
       </div>
 

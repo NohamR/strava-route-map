@@ -1,10 +1,13 @@
 import type { RouteData } from '@/lib/types'
+import type { UnitSystem } from '@/lib/utils'
+import { kmToMi, mToFt } from '@/lib/utils'
 
 interface RouteListProps {
   routes: RouteData[]
   activeIndex: number
   onSelect: (idx: number) => void
   onImageClick: (url: string) => void
+  units: UnitSystem
 }
 
 function escapeHtml(s: string) {
@@ -13,7 +16,7 @@ function escapeHtml(s: string) {
   return d.innerHTML
 }
 
-export function RouteList({ routes, activeIndex, onSelect, onImageClick }: RouteListProps) {
+export function RouteList({ routes, activeIndex, onSelect, onImageClick, units }: RouteListProps) {
   return (
     <ul className="flex-1 overflow-y-auto list-none">
       {routes.map((r) => (
@@ -46,8 +49,16 @@ export function RouteList({ routes, activeIndex, onSelect, onImageClick }: Route
             </div>
             <div className="flex flex-wrap gap-0.5 mt-1">
               <span className="meta-tag">{escapeHtml(r.type)}</span>
-              <span className="meta-tag">{escapeHtml(r.distanceKm)} km</span>
-              <span className="meta-tag">{escapeHtml(String(r.elevationM))} m</span>
+              {units === 'metric' ? (
+                <span className="meta-tag">{escapeHtml(r.distanceKm)} km</span>
+              ) : (
+                <span className="meta-tag">{escapeHtml(kmToMi(parseFloat(r.distanceKm)))} mi</span>
+              )}
+              {units === 'metric' ? (
+                <span className="meta-tag">{escapeHtml(String(r.elevationM))} m</span>
+              ) : (
+                <span className="meta-tag">{escapeHtml(mToFt(r.elevationM))} ft</span>
+              )}
             </div>
             <div className="text-[9px] text-[#a89f97] mt-0.5 truncate">{escapeHtml(r.location)}</div>
           </div>

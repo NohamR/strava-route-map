@@ -5,6 +5,7 @@ import { RouteList } from '@/components/route-list'
 import { RouteDetail } from '@/components/route-detail'
 import { Lightbox } from '@/components/lightbox'
 import type { RouteData } from '@/lib/types'
+import type { UnitSystem } from '@/lib/utils'
 
 interface ResultsViewProps {
   routes: RouteData[]
@@ -14,10 +15,12 @@ interface ResultsViewProps {
   onNewSearch: () => void
   onResearch: () => void
   loading: boolean
+  units: UnitSystem
+  onToggleUnits: () => void
 }
 
 export function ResultsView({
-  routes, totalCount, adjustedBoundingBox, currentLocation, onNewSearch, onResearch, loading,
+  routes, totalCount, adjustedBoundingBox, currentLocation, onNewSearch, onResearch, loading, units, onToggleUnits,
 }: ResultsViewProps) {
   const [activeIndex, setActiveIndex] = useState(-1)
   const [lightboxUrl, setLightboxUrl] = useState<string | null>(null)
@@ -60,6 +63,14 @@ export function ResultsView({
         >
           {loading ? '...' : '⟳ Re-search'}
         </Button>
+        <Button
+          size="sm"
+          className="pointer-events-auto text-xs px-2 h-7 bg-[#ddd8d0] text-[#3e3a35] hover:bg-[#cec8be] shadow-md font-mono"
+          onClick={onToggleUnits}
+          title="Toggle units"
+        >
+          {units === 'metric' ? 'km' : 'mi'}
+        </Button>
       </div>
 
       {/* Desktop panel */}
@@ -77,6 +88,7 @@ export function ResultsView({
           activeIndex={activeIndex}
           onSelect={handleSelect}
           onImageClick={(url) => setLightboxUrl(url)}
+          units={units}
         />
         <div className="shrink-0 text-center py-3 border-t border-[#e4dfd8]">
           <a
@@ -126,6 +138,7 @@ export function ResultsView({
           activeIndex={activeIndex}
           onSelect={handleSelect}
           onImageClick={(url) => setLightboxUrl(url)}
+          units={units}
         />
         <div className="shrink-0 text-center py-3 border-t border-[#e4dfd8]">
           <a
@@ -141,11 +154,12 @@ export function ResultsView({
 
       {/* Route detail panel */}
       {activeIndex >= 0 && routes[activeIndex] && (
-        <div className="fixed bottom-4 left-4 right-4 z-20 md:left-auto md:right-4 md:w-[320px] md:bottom-24">
+        <div className="fixed bottom-4 left-4 right-4 z-20 md:left-auto md:right-[356px] md:w-[320px] md:bottom-24">
           <RouteDetail
             route={routes[activeIndex]}
             onUnselect={() => setActiveIndex(-1)}
             onImageClick={(url) => setLightboxUrl(url)}
+            units={units}
           />
         </div>
       )}

@@ -1,4 +1,4 @@
-# Strava Route Map — Python CLI
+# Strava Route Map - Python CLI
 
 Query the Strava suggested routes API and render the results on an interactive Leaflet map.
 

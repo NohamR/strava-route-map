@@ -149,7 +149,7 @@ def main() -> None:
     if result.adjustedBoundingBox:
         print(f"Search area: {result.adjustedBoundingBox}\n")
     else:
-        print("No routes found — try expanding the bounding box or reducing filters.\n")
+        print("No routes found: try expanding the bounding box or reducing filters.\n")
     for i, r in enumerate(result.routes, 1):
         print(f"  {i}. {r.title}")
         print(f"     {r.routeType} | {r.length/1000:.1f} km | {r.elevationGain:.0f} m")

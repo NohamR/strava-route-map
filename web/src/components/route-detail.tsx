@@ -1,25 +1,40 @@
 import { Button } from '@/components/ui/button'
+import { Download } from 'lucide-react'
 import type { RouteData } from '@/lib/types'
+import type { UnitSystem } from '@/lib/utils'
+import { kmToMi, mToFt } from '@/lib/utils'
+import { downloadGpx } from '@/lib/gpx'
 
 interface RouteDetailProps {
   route: RouteData
   onUnselect: () => void
   onImageClick: (url: string) => void
+  units: UnitSystem
 }
 
-export function RouteDetail({ route, onUnselect, onImageClick }: RouteDetailProps) {
+export function RouteDetail({ route, onUnselect, onImageClick, units }: RouteDetailProps) {
   return (
     <div className="bg-white rounded-lg shadow-lg border border-[#d8d2ca] overflow-hidden">
       <div className="p-3 space-y-2">
         <div className="flex items-start justify-between gap-2">
           <h3 className="text-sm font-bold text-stone leading-snug line-clamp-2">{route.title}</h3>
-          <Button
-            size="sm"
-            className="shrink-0 text-xs px-2 h-6 bg-[#ddd8d0] text-[#3e3a35] hover:bg-[#cec8be]"
-            onClick={onUnselect}
-          >
-            ✕
-          </Button>
+          <div className="flex gap-1 shrink-0">
+            <Button
+              size="sm"
+              className="text-xs px-2 h-6 bg-[#ddd8d0] text-[#3e3a35] hover:bg-[#cec8be]"
+              onClick={() => downloadGpx(route)}
+            >
+              <Download className="size-3" />
+              GPX
+            </Button>
+            <Button
+              size="sm"
+              className="text-xs px-2 h-6 bg-[#ddd8d0] text-[#3e3a35] hover:bg-[#cec8be]"
+              onClick={onUnselect}
+            >
+              ✕
+            </Button>
+          </div>
         </div>
 
         {route.location && (
@@ -28,8 +43,16 @@ export function RouteDetail({ route, onUnselect, onImageClick }: RouteDetailProp
 
         <div className="flex flex-wrap gap-1">
           <span className="meta-tag">{route.type}</span>
-          <span className="meta-tag">{route.distanceKm} km</span>
-          <span className="meta-tag">{route.elevationM} m</span>
+          {units === 'metric' ? (
+            <span className="meta-tag">{route.distanceKm} km</span>
+          ) : (
+            <span className="meta-tag">{kmToMi(parseFloat(route.distanceKm))} mi</span>
+          )}
+          {units === 'metric' ? (
+            <span className="meta-tag">{route.elevationM} m</span>
+          ) : (
+            <span className="meta-tag">{mToFt(route.elevationM)} ft</span>
+          )}
           {route.eta && <span className="meta-tag">{route.eta}</span>}
           {route.difficulty && route.difficulty !== 'Undefined' && (
             <span className="meta-tag">{route.difficulty}</span>

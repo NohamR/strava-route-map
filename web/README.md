@@ -1,32 +1,23 @@
-# React + TypeScript + Vite
+# Strava Route Map - Web App
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+Search and explore suggested routes from Strava on an interactive map.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- Search Strava routes by location, type, difficulty, elevation, and distance
+- Interactive Leaflet map with 6 base layers (OSM, Topo, Street, Dark, Satellite, Hybrid)
+- Route list with detail cards, ETA, and images
+- GPX export for any route
+- Unit toggle : switch between km/m and mi/ft (persisted in localStorage)
 
-## React Compiler
+## Tech Stack
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+React 19, TypeScript 6, Vite 8, Tailwind CSS v4, shadcn/ui (base-nova), Leaflet, Lucide icons.
 
-## Expanding the Oxlint configuration
+## Build
 
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
-
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+```sh
+npm install
+npm run dev    # dev server
+npm run build  # production build
 ```
-
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
