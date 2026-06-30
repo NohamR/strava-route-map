@@ -1,4 +1,19 @@
-# strava-route-map
+<p align="center">
+    <img src="docs/images/logo_bg.png" width="256">
+    <br/>
+    <strong>strava-route-map</strong>
+    <br/>
+    <sup><em>Strava Route Explorer</em></sup>
+</p>
+
+<p align="center">
+    <a href="https://github.com/NohamR/strava-route-map/blob/main/LICENSE">
+        <img src="https://img.shields.io/:license-MIT-blue.svg" alt="License">
+    </a>
+    <a href="https://github.com/NohamR/strava-route-map">
+        <img src="https://img.shields.io/badge/status-active-brightgreen" alt="Status">
+    </a>
+</p>
 
 Query the Strava suggested routes API and render the results on an interactive Leaflet map.
 

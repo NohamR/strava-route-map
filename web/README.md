@@ -1,4 +1,8 @@
-# Strava Route Map - Web App
+<div align="center">
+  <img src="./public/logo.png" width="120" alt="Strava Route Explorer logo" />
+</div>
+
+# Strava Route Explorer
 
 Search and explore suggested routes from Strava on an interactive map.
 
